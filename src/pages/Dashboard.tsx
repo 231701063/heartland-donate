@@ -1,13 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock } from "lucide-react";
+import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock, ArrowLeft } from "lucide-react";
 
 interface DashboardProps {
   userType: 'donor' | 'patient' | 'hospital';
+  onBack: () => void;
 }
 
-export const Dashboard = ({ userType }: DashboardProps) => {
+export const Dashboard = ({ userType, onBack }: DashboardProps) => {
   const renderDonorDashboard = () => (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -218,6 +219,14 @@ export const Dashboard = ({ userType }: DashboardProps) => {
   return (
     <div className="min-h-screen bg-gradient-subtle pt-20 pb-16">
       <div className="container mx-auto px-4">
+        <Button 
+          variant="ghost" 
+          onClick={onBack}
+          className="mb-6 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Home
+        </Button>
         {userType === 'donor' && renderDonorDashboard()}
         {userType === 'patient' && renderPatientDashboard()}
         {userType === 'hospital' && renderHospitalDashboard()}
