@@ -22,7 +22,7 @@ const Index = () => {
     return (
       <>
         <Navigation />
-        <Dashboard userType={userType} onBack={handleBackToLanding} />
+        <Dashboard userType={userType} />
       </>
     );
   }
