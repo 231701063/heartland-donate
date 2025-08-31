@@ -1,31 +1,12 @@
-import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { HeroSection } from "@/components/HeroSection";
 import { UserTypeSelection } from "@/components/UserTypeSelection";
-import { Dashboard } from "@/pages/Dashboard";
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<'landing' | 'dashboard'>('landing');
-  const [userType, setUserType] = useState<'donor' | 'patient' | 'hospital' | null>(null);
-
   const handleUserTypeSelect = (type: 'donor' | 'patient' | 'hospital') => {
-    setUserType(type);
-    setCurrentView('dashboard');
+    // This can be extended later for role-based routing
+    console.log(`Selected user type: ${type}`);
   };
-
-  const handleBackToLanding = () => {
-    setCurrentView('landing');
-    setUserType(null);
-  };
-
-  if (currentView === 'dashboard' && userType) {
-    return (
-      <>
-        <Navigation />
-        <Dashboard userType={userType} />
-      </>
-    );
-  }
 
   return (
     <div className="min-h-screen">
