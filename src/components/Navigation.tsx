@@ -1,9 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X } from "lucide-react";
+import { Heart, Menu, X, User, LogOut } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-border z-50">
@@ -35,8 +42,29 @@ export const Navigation = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost">Sign In</Button>
-            <Button variant="hero">Get Started</Button>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Link to="/auth/dashboard">
+                  <Button variant="outline">
+                    <User className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button variant="ghost" onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link to="/auth/login">
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+                <Link to="/auth/signup">
+                  <Button variant="hero">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -67,8 +95,29 @@ export const Navigation = () => {
                 Contact
               </a>
               <div className="pt-4 space-y-2">
-                <Button variant="ghost" className="w-full">Sign In</Button>
-                <Button variant="hero" className="w-full">Get Started</Button>
+                {user ? (
+                  <>
+                    <Link to="/auth/dashboard" className="block">
+                      <Button variant="outline" className="w-full">
+                        <User className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <Button variant="ghost" className="w-full" onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/auth/login" className="block">
+                      <Button variant="ghost" className="w-full">Sign In</Button>
+                    </Link>
+                    <Link to="/auth/signup" className="block">
+                      <Button variant="hero" className="w-full">Get Started</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
