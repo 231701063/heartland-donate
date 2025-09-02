@@ -2,16 +2,53 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
 import { ScheduleDonationDialog } from "@/components/ScheduleDonationDialog";
-import { useScheduledDonations } from "@/hooks/useScheduledDonations";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 
 interface DashboardProps {
   userType: 'donor' | 'patient' | 'hospital';
 }
 
+interface ScheduledDonation {
+  id: string;
+  scheduled_date: string;
+  status: string;
+}
+
 export const Dashboard = ({ userType }: DashboardProps) => {
-  const { donations, loading: donationsLoading, refetch } = useScheduledDonations();
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [scheduledDonations, setScheduledDonations] = useState<ScheduledDonation[]>([]);
+  const { user } = useAuth();
+
+  const fetchScheduledDonations = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('scheduled_donations')
+        .select('id, scheduled_date, status')
+        .eq('user_id', user.id)
+        .eq('status', 'scheduled')
+        .order('scheduled_date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching scheduled donations:', error);
+      } else {
+        setScheduledDonations(data || []);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (userType === 'donor' && user) {
+      fetchScheduledDonations();
+    }
+  }, [userType, user]);
   
   const renderDonorDashboard = () => (
     <div className="space-y-8">
@@ -19,12 +56,14 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       <div className="bg-gradient-hero text-white p-8 rounded-lg shadow-medium">
         <h1 className="text-3xl font-bold mb-2">Welcome back, Sarah!</h1>
         <p className="text-white/90 mb-4">Your next donation eligibility: March 15, 2024</p>
-        <ScheduleDonationDialog onScheduled={refetch}>
-          <Button variant="secondary" className="bg-white text-primary hover:bg-white/90">
-            <Calendar className="mr-2 h-4 w-4" />
-            Schedule Donation
-          </Button>
-        </ScheduleDonationDialog>
+        <Button 
+          variant="secondary" 
+          className="bg-white text-primary hover:bg-white/90"
+          onClick={() => setShowScheduleDialog(true)}
+        >
+          <Calendar className="mr-2 h-4 w-4" />
+          Schedule Donation
+        </Button>
       </div>
 
       {/* Stats */}
@@ -68,14 +107,14 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       </div>
 
       {/* Scheduled Donations */}
-      {!donationsLoading && donations.length > 0 && (
+      {scheduledDonations.length > 0 && (
         <Card className="p-6">
           <h3 className="text-xl font-semibold mb-4">Your Scheduled Donations</h3>
-          <div className="space-y-3">
-            {donations.map((donation) => (
-              <div key={donation.id} className="flex items-center justify-between p-4 bg-primary/10 border border-primary/20 rounded-lg">
+          <div className="space-y-4">
+            {scheduledDonations.map((donation) => (
+              <div key={donation.id} className="flex items-center justify-between p-4 bg-secondary/10 rounded-lg border border-secondary/20">
                 <div className="flex items-center gap-4">
-                  <Calendar className="h-5 w-5 text-primary" />
+                  <Calendar className="h-5 w-5 text-secondary" />
                   <div>
                     <p className="font-medium">Scheduled Donation</p>
                     <p className="text-sm text-muted-foreground">
@@ -83,7 +122,9 @@ export const Dashboard = ({ userType }: DashboardProps) => {
                     </p>
                   </div>
                 </div>
-                <Badge className="bg-primary text-primary-foreground">Scheduled</Badge>
+                <Badge className="bg-secondary text-secondary-foreground">
+                  {donation.status}
+                </Badge>
               </div>
             ))}
           </div>
@@ -252,6 +293,13 @@ export const Dashboard = ({ userType }: DashboardProps) => {
         {userType === 'patient' && renderPatientDashboard()}
         {userType === 'hospital' && renderHospitalDashboard()}
       </div>
+      
+      {/* Schedule Donation Dialog */}
+      <ScheduleDonationDialog
+        open={showScheduleDialog}
+        onOpenChange={setShowScheduleDialog}
+        onScheduled={fetchScheduledDonations}
+      />
     </div>
   );
 };

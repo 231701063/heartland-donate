@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Heart, User, Phone, Mail, Droplets, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 
 interface UserProfile {
   name: string;
@@ -86,10 +87,17 @@ export const AuthDashboard = () => {
             <Heart className="h-8 w-8 text-secondary mr-3" />
             <h1 className="text-3xl font-bold text-foreground">Welcome to BloodConnect</h1>
           </div>
-          <Button onClick={handleSignOut} variant="outline">
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link to="/">
+              <Button variant="outline">
+                Back to Dashboard
+              </Button>
+            </Link>
+            <Button onClick={handleSignOut} variant="outline">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">

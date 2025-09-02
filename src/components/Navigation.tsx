@@ -29,9 +29,9 @@ export const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#home" className="text-foreground hover:text-primary transition-colors">
-              Home
-            </a>
+            <Link to="/" className="text-foreground hover:text-primary transition-colors">
+              Back to Dashboard
+            </Link>
             <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
               How It Works
             </a>
@@ -93,9 +93,9 @@ export const Navigation = () => {
         {isMenuOpen && (
           <div className="md:hidden border-t border-border bg-white/95 backdrop-blur-sm">
             <div className="py-4 space-y-4">
-              <a href="#home" className="block text-foreground hover:text-primary transition-colors">
-                Home
-              </a>
+              <Link to="/" className="block text-foreground hover:text-primary transition-colors">
+                Back to Dashboard
+              </Link>
               <a href="#how-it-works" className="block text-foreground hover:text-primary transition-colors">
                 How It Works
               </a>
