@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X, User, LogOut } from "lucide-react";
+import { Heart, Menu, X, User, LogOut, Home } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const location = useLocation();
+  
+  const showBackToDashboard = location.pathname !== '/';
 
   const handleSignOut = async () => {
     await signOut();
@@ -42,12 +45,20 @@ export const Navigation = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
+            {showBackToDashboard && (
+              <Link to="/">
+                <Button variant="outline">
+                  <Home className="mr-2 h-4 w-4" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+            )}
             {user ? (
               <div className="flex items-center gap-2">
                 <Link to="/auth/dashboard">
                   <Button variant="outline">
                     <User className="mr-2 h-4 w-4" />
-                    Dashboard
+                    Profile
                   </Button>
                 </Link>
                 <Button variant="ghost" onClick={handleSignOut}>
@@ -95,12 +106,20 @@ export const Navigation = () => {
                 Contact
               </a>
               <div className="pt-4 space-y-2">
+                {showBackToDashboard && (
+                  <Link to="/" className="block">
+                    <Button variant="outline" className="w-full">
+                      <Home className="mr-2 h-4 w-4" />
+                      Back to Dashboard
+                    </Button>
+                  </Link>
+                )}
                 {user ? (
                   <>
                     <Link to="/auth/dashboard" className="block">
                       <Button variant="outline" className="w-full">
                         <User className="mr-2 h-4 w-4" />
-                        Dashboard
+                        Profile
                       </Button>
                     </Link>
                     <Button variant="ghost" className="w-full" onClick={handleSignOut}>

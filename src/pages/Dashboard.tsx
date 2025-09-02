@@ -2,22 +2,29 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock } from "lucide-react";
+import { ScheduleDonationDialog } from "@/components/ScheduleDonationDialog";
+import { useScheduledDonations } from "@/hooks/useScheduledDonations";
+import { format } from "date-fns";
 
 interface DashboardProps {
   userType: 'donor' | 'patient' | 'hospital';
 }
 
 export const Dashboard = ({ userType }: DashboardProps) => {
+  const { donations, loading: donationsLoading, refetch } = useScheduledDonations();
+  
   const renderDonorDashboard = () => (
     <div className="space-y-8">
       {/* Welcome Section */}
       <div className="bg-gradient-hero text-white p-8 rounded-lg shadow-medium">
         <h1 className="text-3xl font-bold mb-2">Welcome back, Sarah!</h1>
         <p className="text-white/90 mb-4">Your next donation eligibility: March 15, 2024</p>
-        <Button variant="secondary" className="bg-white text-primary hover:bg-white/90">
-          <Calendar className="mr-2 h-4 w-4" />
-          Schedule Donation
-        </Button>
+        <ScheduleDonationDialog onScheduled={refetch}>
+          <Button variant="secondary" className="bg-white text-primary hover:bg-white/90">
+            <Calendar className="mr-2 h-4 w-4" />
+            Schedule Donation
+          </Button>
+        </ScheduleDonationDialog>
       </div>
 
       {/* Stats */}
@@ -59,6 +66,29 @@ export const Dashboard = ({ userType }: DashboardProps) => {
           </div>
         </Card>
       </div>
+
+      {/* Scheduled Donations */}
+      {!donationsLoading && donations.length > 0 && (
+        <Card className="p-6">
+          <h3 className="text-xl font-semibold mb-4">Your Scheduled Donations</h3>
+          <div className="space-y-3">
+            {donations.map((donation) => (
+              <div key={donation.id} className="flex items-center justify-between p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Scheduled Donation</p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(donation.scheduled_date), "PPP")}
+                    </p>
+                  </div>
+                </div>
+                <Badge className="bg-primary text-primary-foreground">Scheduled</Badge>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Recent Requests */}
       <Card className="p-6">
