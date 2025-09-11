@@ -4,8 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ScheduleDonationDialog } from "@/components/ScheduleDonationDialog";
+import { CreateBloodRequestDialog } from "@/components/CreateBloodRequestDialog";
+import { AcceptRequestDialog } from "@/components/AcceptRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useBloodRequests, BloodRequest } from "@/hooks/useBloodRequests";
+import { useHospitalInventory } from "@/hooks/useHospitalInventory";
 import { format } from "date-fns";
 
 interface DashboardProps {
@@ -20,8 +24,14 @@ interface ScheduledDonation {
 
 export const Dashboard = ({ userType }: DashboardProps) => {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [showEmergencyRequestDialog, setShowEmergencyRequestDialog] = useState(false);
+  const [showNormalRequestDialog, setShowNormalRequestDialog] = useState(false);
+  const [showAcceptDialog, setShowAcceptDialog] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<BloodRequest | null>(null);
   const [scheduledDonations, setScheduledDonations] = useState<ScheduledDonation[]>([]);
   const { user } = useAuth();
+  const bloodRequestsHook = useBloodRequests();
+  const hospitalInventoryHook = useHospitalInventory(user?.id);
 
   const fetchScheduledDonations = async () => {
     if (!user) return;
@@ -47,8 +57,25 @@ export const Dashboard = ({ userType }: DashboardProps) => {
   useEffect(() => {
     if (userType === 'donor' && user) {
       fetchScheduledDonations();
+      bloodRequestsHook.fetchDonorRequests();
+    } else if (userType === 'patient' && user) {
+      bloodRequestsHook.fetchPatientRequests();
+    } else if (userType === 'hospital' && user) {
+      bloodRequestsHook.fetchAllRequests();
+      hospitalInventoryHook.fetchInventory();
     }
   }, [userType, user]);
+
+  const handleAcceptRequest = (request: BloodRequest) => {
+    setSelectedRequest(request);
+    setShowAcceptDialog(true);
+  };
+
+  const handleRequestCreated = () => {
+    if (userType === 'patient') {
+      bloodRequestsHook.fetchPatientRequests();
+    }
+  };
   
   const renderDonorDashboard = () => (
     <div className="space-y-8">
@@ -133,20 +160,43 @@ export const Dashboard = ({ userType }: DashboardProps) => {
 
       {/* Recent Requests */}
       <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4">Recent Blood Requests</h3>
+        <h3 className="text-xl font-semibold mb-4">Blood Requests</h3>
         <div className="space-y-4">
-          {[1, 2, 3].map((req) => (
-            <div key={req} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-4">
-                <Badge variant="destructive">O+</Badge>
-                <div>
-                  <p className="font-medium">Emergency Request</p>
-                  <p className="text-sm text-muted-foreground">City Hospital - 2.1 km away</p>
+          {bloodRequestsHook.loading ? (
+            <p className="text-muted-foreground">Loading requests...</p>
+          ) : bloodRequestsHook.requests.filter(r => r.status === 'pending').length === 0 ? (
+            <p className="text-muted-foreground">No pending requests at the moment.</p>
+          ) : (
+            bloodRequestsHook.requests
+              .filter(r => r.status === 'pending')
+              .map((request) => (
+                <div key={request.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <Badge variant={request.request_type === 'emergency' ? 'destructive' : 'secondary'}>
+                      {request.blood_type}
+                    </Badge>
+                    <div>
+                      <p className="font-medium">
+                        {request.request_type === 'emergency' ? 'Emergency' : 'Normal'} Request
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Created {format(new Date(request.created_at), "PPP")}
+                      </p>
+                      {request.notes && (
+                        <p className="text-sm text-muted-foreground mt-1">{request.notes}</p>
+                      )}
+                    </div>
+                  </div>
+                  <Button 
+                    variant="hero" 
+                    size="sm"
+                    onClick={() => handleAcceptRequest(request)}
+                  >
+                    Accept
+                  </Button>
                 </div>
-              </div>
-              <Button variant="hero" size="sm">Respond</Button>
-            </div>
-          ))}
+              ))
+          )}
         </div>
       </Card>
     </div>
@@ -158,30 +208,74 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       <div className="bg-gradient-emergency text-white p-8 rounded-lg shadow-emergency">
         <h1 className="text-3xl font-bold mb-2">Patient Portal</h1>
         <p className="text-white/90 mb-4">Need blood urgently? We're here to help connect you with donors.</p>
-        <Button variant="secondary" className="bg-white text-secondary hover:bg-white/90">
-          <AlertCircle className="mr-2 h-4 w-4" />
-          Create Emergency Request
-        </Button>
+        <div className="flex gap-4">
+          <Button 
+            variant="secondary" 
+            className="bg-white text-secondary hover:bg-white/90"
+            onClick={() => setShowEmergencyRequestDialog(true)}
+          >
+            <AlertCircle className="mr-2 h-4 w-4" />
+            Create Emergency Request
+          </Button>
+          <Button 
+            variant="outline" 
+            className="border-white text-white hover:bg-white/10"
+            onClick={() => setShowNormalRequestDialog(true)}
+          >
+            <Heart className="mr-2 h-4 w-4" />
+            Create Normal Request
+          </Button>
+        </div>
       </div>
 
       {/* Active Requests */}
       <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4">Your Active Requests</h3>
+        <h3 className="text-xl font-semibold mb-4">Your Blood Requests</h3>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-secondary/10 border border-secondary/20 rounded-lg">
-            <div className="flex items-center gap-4">
-              <Badge variant="destructive">B+</Badge>
-              <div>
-                <p className="font-medium">Urgent Request</p>
-                <p className="text-sm text-muted-foreground">Created 2 hours ago</p>
+          {bloodRequestsHook.loading ? (
+            <p className="text-muted-foreground">Loading your requests...</p>
+          ) : bloodRequestsHook.requests.length === 0 ? (
+            <p className="text-muted-foreground">No requests created yet.</p>
+          ) : (
+            bloodRequestsHook.requests.map((request) => (
+              <div key={request.id} className="flex items-center justify-between p-4 bg-secondary/10 border border-secondary/20 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Badge variant={request.request_type === 'emergency' ? 'destructive' : 'secondary'}>
+                    {request.blood_type}
+                  </Badge>
+                  <div>
+                    <p className="font-medium">
+                      {request.request_type === 'emergency' ? 'Emergency' : 'Normal'} Request
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Created {format(new Date(request.created_at), "PPP")}
+                    </p>
+                    {request.notes && (
+                      <p className="text-sm text-muted-foreground mt-1">{request.notes}</p>
+                    )}
+                  </div>
+                  <Badge className={`${
+                    request.status === 'pending' ? 'bg-warning text-warning-foreground' :
+                    request.status === 'accepted' ? 'bg-success text-success-foreground' :
+                    request.status === 'completed' ? 'bg-primary text-primary-foreground' :
+                    'bg-muted text-muted-foreground'
+                  }`}>
+                    {request.status}
+                  </Badge>
+                </div>
+                <div className="text-right">
+                  {request.status === 'accepted' && request.scheduled_date && (
+                    <>
+                      <p className="font-bold text-primary">Donation Scheduled</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(request.scheduled_date), "PPP")}
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
-              <Badge className="bg-warning text-warning-foreground">Active</Badge>
-            </div>
-            <div className="text-right">
-              <p className="font-bold text-primary">5 Donors Found</p>
-              <p className="text-sm text-muted-foreground">In your area</p>
-            </div>
-          </div>
+            ))
+          )}
         </div>
       </Card>
 
@@ -237,49 +331,90 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       <Card className="p-6">
         <h3 className="text-xl font-semibold mb-4">Current Blood Inventory</h3>
         <div className="grid md:grid-cols-4 gap-4">
-          {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map((type) => (
-            <div key={type} className="p-4 border border-border rounded-lg text-center">
-              <Badge variant="outline" className="mb-2">{type}</Badge>
-              <p className="text-2xl font-bold mb-1">
-                {Math.floor(Math.random() * 50) + 10} units
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {Math.random() > 0.7 ? 'Low Stock' : 'Good Stock'}
-              </p>
-            </div>
-          ))}
+          {hospitalInventoryHook.loading ? (
+            <p className="col-span-4 text-muted-foreground">Loading inventory...</p>
+          ) : (
+            hospitalInventoryHook.inventory.map((item) => (
+              <div key={item.blood_type} className="p-4 border border-border rounded-lg text-center">
+                <Badge variant="outline" className="mb-2">{item.blood_type}</Badge>
+                <p className="text-2xl font-bold mb-1">{item.units_available} units</p>
+                <p className="text-sm text-muted-foreground">
+                  {item.units_available < 20 ? 'Low Stock' : 'Good Stock'}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       </Card>
 
       {/* Recent Requests */}
       <div className="grid md:grid-cols-2 gap-6">
         <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-4">Pending Requests</h3>
-          <div className="space-y-4">
-            {[1, 2, 3].map((req) => (
-              <div key={req} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="font-medium">Patient #{req}</p>
-                  <p className="text-sm text-muted-foreground">Needs: O+ blood</p>
+          <h3 className="text-xl font-semibold mb-4">All Blood Requests</h3>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {bloodRequestsHook.loading ? (
+              <p className="text-muted-foreground">Loading requests...</p>
+            ) : bloodRequestsHook.requests.length === 0 ? (
+              <p className="text-muted-foreground">No requests found.</p>
+            ) : (
+              bloodRequestsHook.requests.map((request) => (
+                <div key={request.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="font-medium">
+                      {request.request_type === 'emergency' ? 'Emergency' : 'Normal'} Request
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Blood Type: {request.blood_type} | Status: {request.status}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Created: {format(new Date(request.created_at), "PPP")}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={`${
+                      request.status === 'pending' ? 'bg-warning text-warning-foreground' :
+                      request.status === 'accepted' ? 'bg-success text-success-foreground' :
+                      request.status === 'completed' ? 'bg-primary text-primary-foreground' :
+                      'bg-muted text-muted-foreground'
+                    }`}>
+                      {request.status}
+                    </Badge>
+                    {request.status === 'accepted' && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => bloodRequestsHook.completeRequest(request.id)}
+                      >
+                        Mark Complete
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <Button variant="outline" size="sm">Process</Button>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-xl font-semibold mb-4">Available Donors</h3>
+          <h3 className="text-xl font-semibold mb-4">Completed Donations</h3>
           <div className="space-y-4">
-            {[1, 2, 3].map((donor) => (
-              <div key={donor} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="font-medium">Donor #{donor}</p>
-                  <p className="text-sm text-muted-foreground">Type: O+, Available</p>
+            {bloodRequestsHook.requests
+              .filter(r => r.status === 'completed')
+              .slice(0, 5)
+              .map((request) => (
+                <div key={request.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="font-medium">Donation Completed</p>
+                    <p className="text-sm text-muted-foreground">
+                      Blood Type: {request.blood_type}
+                    </p>
+                  </div>
+                  <Badge className="bg-primary text-primary-foreground">Completed</Badge>
                 </div>
-                <Button variant="outline" size="sm">Contact</Button>
-              </div>
-            ))}
+              ))}
+            {bloodRequestsHook.requests.filter(r => r.status === 'completed').length === 0 && (
+              <p className="text-muted-foreground">No completed donations yet.</p>
+            )}
           </div>
         </Card>
       </div>
@@ -294,11 +429,32 @@ export const Dashboard = ({ userType }: DashboardProps) => {
         {userType === 'hospital' && renderHospitalDashboard()}
       </div>
       
-      {/* Schedule Donation Dialog */}
+      {/* Dialogs */}
       <ScheduleDonationDialog
         open={showScheduleDialog}
         onOpenChange={setShowScheduleDialog}
         onScheduled={fetchScheduledDonations}
+      />
+      
+      <CreateBloodRequestDialog
+        open={showEmergencyRequestDialog}
+        onOpenChange={setShowEmergencyRequestDialog}
+        requestType="emergency"
+        onRequestCreated={handleRequestCreated}
+      />
+      
+      <CreateBloodRequestDialog
+        open={showNormalRequestDialog}
+        onOpenChange={setShowNormalRequestDialog}
+        requestType="normal"
+        onRequestCreated={handleRequestCreated}
+      />
+      
+      <AcceptRequestDialog
+        open={showAcceptDialog}
+        onOpenChange={setShowAcceptDialog}
+        request={selectedRequest}
+        onAccept={bloodRequestsHook.acceptRequest}
       />
     </div>
   );

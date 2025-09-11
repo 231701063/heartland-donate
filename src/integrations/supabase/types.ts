@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      blood_requests: {
+        Row: {
+          blood_type: string
+          created_at: string
+          donor_id: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          request_type: string
+          scheduled_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          blood_type: string
+          created_at?: string
+          donor_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          request_type?: string
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          blood_type?: string
+          created_at?: string
+          donor_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          request_type?: string
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hospital_inventory: {
+        Row: {
+          blood_type: string
+          hospital_id: string
+          id: string
+          last_updated: string
+          units_available: number
+        }
+        Insert: {
+          blood_type: string
+          hospital_id: string
+          id?: string
+          last_updated?: string
+          units_available?: number
+        }
+        Update: {
+          blood_type?: string
+          hospital_id?: string
+          id?: string
+          last_updated?: string
+          units_available?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           blood_group: string
