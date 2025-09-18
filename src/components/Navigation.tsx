@@ -30,7 +30,7 @@ export const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <Link to="/" className="text-foreground hover:text-primary transition-colors">
-              Back to Dashboard
+              Dashboard
             </Link>
             <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
               How It Works
@@ -49,7 +49,7 @@ export const Navigation = () => {
               <Link to="/">
                 <Button variant="outline">
                   <Home className="mr-2 h-4 w-4" />
-                  Back to Dashboard
+                  Dashboard
                 </Button>
               </Link>
             )}
@@ -94,7 +94,7 @@ export const Navigation = () => {
           <div className="md:hidden border-t border-border bg-white/95 backdrop-blur-sm">
             <div className="py-4 space-y-4">
               <Link to="/" className="block text-foreground hover:text-primary transition-colors">
-                Back to Dashboard
+                Dashboard
               </Link>
               <a href="#how-it-works" className="block text-foreground hover:text-primary transition-colors">
                 How It Works
@@ -110,7 +110,7 @@ export const Navigation = () => {
                   <Link to="/" className="block">
                     <Button variant="outline" className="w-full">
                       <Home className="mr-2 h-4 w-4" />
-                      Back to Dashboard
+                      Dashboard
                     </Button>
                   </Link>
                 )}

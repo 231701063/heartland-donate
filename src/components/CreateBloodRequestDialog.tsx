@@ -5,10 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertCircle, Heart } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AlertCircle, Heart, CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface CreateBloodRequestDialogProps {
   open: boolean;
@@ -25,6 +29,7 @@ export const CreateBloodRequestDialog = ({
 }: CreateBloodRequestDialogProps) => {
   const [bloodType, setBloodType] = useState("");
   const [notes, setNotes] = useState("");
+  const [upToDate, setUpToDate] = useState<Date>();
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
@@ -42,6 +47,15 @@ export const CreateBloodRequestDialog = ({
       return;
     }
 
+    if (!upToDate) {
+      toast({
+        title: "Error",
+        description: "Please select a valid until date",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -51,7 +65,8 @@ export const CreateBloodRequestDialog = ({
           patient_id: user.id,
           blood_type: bloodType,
           request_type: requestType,
-          notes: notes.trim() || null
+          notes: notes.trim() || null,
+          up_to_date: upToDate?.toISOString().split('T')[0]
         });
 
       if (error) {
@@ -70,6 +85,7 @@ export const CreateBloodRequestDialog = ({
         // Reset form
         setBloodType("");
         setNotes("");
+        setUpToDate(undefined);
         onOpenChange(false);
         onRequestCreated();
       }
@@ -97,7 +113,7 @@ export const CreateBloodRequestDialog = ({
             ) : (
               <Heart className="h-5 w-5 text-primary" />
             )}
-            Create {isEmergency ? 'Emergency' : 'Normal'} Blood Request
+            Create {isEmergency ? 'Emergency' : ''} Blood Request
           </DialogTitle>
           <DialogDescription>
             {isEmergency 
@@ -125,6 +141,34 @@ export const CreateBloodRequestDialog = ({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="upToDate">Valid Until Date *</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !upToDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {upToDate ? format(upToDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={upToDate}
+                  onSelect={setUpToDate}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="notes">Additional Notes</Label>
             <Textarea
               id="notes"
@@ -146,7 +190,7 @@ export const CreateBloodRequestDialog = ({
             </Button>
             <Button
               type="submit"
-              disabled={loading || !bloodType}
+              disabled={loading || !bloodType || !upToDate}
               className={isEmergency ? "bg-destructive hover:bg-destructive/90" : ""}
             >
               {loading ? "Creating..." : `Create ${isEmergency ? 'Emergency' : ''} Request`}

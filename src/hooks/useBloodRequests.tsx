@@ -12,6 +12,7 @@ export interface BloodRequest {
   donor_id?: string;
   scheduled_date?: string;
   notes?: string;
+  up_to_date?: string;
   created_at: string;
   updated_at: string;
 }

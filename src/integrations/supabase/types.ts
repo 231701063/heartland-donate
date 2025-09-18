@@ -25,6 +25,7 @@ export type Database = {
           request_type: string
           scheduled_date: string | null
           status: string
+          up_to_date: string | null
           updated_at: string
         }
         Insert: {
@@ -37,6 +38,7 @@ export type Database = {
           request_type?: string
           scheduled_date?: string | null
           status?: string
+          up_to_date?: string | null
           updated_at?: string
         }
         Update: {
@@ -49,6 +51,7 @@ export type Database = {
           request_type?: string
           scheduled_date?: string | null
           status?: string
+          up_to_date?: string | null
           updated_at?: string
         }
         Relationships: []

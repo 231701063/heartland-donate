@@ -182,6 +182,11 @@ export const Dashboard = ({ userType }: DashboardProps) => {
                       <p className="text-sm text-muted-foreground">
                         Created {format(new Date(request.created_at), "PPP")}
                       </p>
+                      {request.up_to_date && (
+                        <p className="text-sm text-muted-foreground">
+                          Valid until {format(new Date(request.up_to_date), "PPP")}
+                        </p>
+                      )}
                       {request.notes && (
                         <p className="text-sm text-muted-foreground mt-1">{request.notes}</p>
                       )}
@@ -223,7 +228,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
             onClick={() => setShowNormalRequestDialog(true)}
           >
             <Heart className="mr-2 h-4 w-4" />
-            Create Normal Request
+            Create Request
           </Button>
         </div>
       </div>
@@ -250,6 +255,11 @@ export const Dashboard = ({ userType }: DashboardProps) => {
                     <p className="text-sm text-muted-foreground">
                       Created {format(new Date(request.created_at), "PPP")}
                     </p>
+                    {request.up_to_date && (
+                      <p className="text-sm text-muted-foreground">
+                        Valid until {format(new Date(request.up_to_date), "PPP")}
+                      </p>
+                    )}
                     {request.notes && (
                       <p className="text-sm text-muted-foreground mt-1">{request.notes}</p>
                     )}
@@ -369,6 +379,11 @@ export const Dashboard = ({ userType }: DashboardProps) => {
                     <p className="text-sm text-muted-foreground">
                       Created: {format(new Date(request.created_at), "PPP")}
                     </p>
+                    {request.up_to_date && (
+                      <p className="text-sm text-muted-foreground">
+                        Valid until: {format(new Date(request.up_to_date), "PPP")}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={`${
