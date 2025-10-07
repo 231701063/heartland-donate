@@ -6,7 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Heart, User, Phone, Mail, Droplets, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { FindDonorDialog } from '@/components/FindDonorDialog';
 
 interface UserProfile {
   name: string;
@@ -18,6 +19,7 @@ interface UserProfile {
 export const AuthDashboard = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -165,12 +167,20 @@ export const AuthDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button variant="hero" className="h-auto p-4 flex-col space-y-2">
-                  <Heart className="h-6 w-6" />
-                  <span>Find Blood Donors</span>
-                </Button>
+                <FindDonorDialog
+                  trigger={
+                    <Button variant="hero" className="h-auto p-4 flex-col space-y-2 w-full">
+                      <Heart className="h-6 w-6" />
+                      <span>Find Blood Donors</span>
+                    </Button>
+                  }
+                />
                 
-                <Button variant="secondary" className="h-auto p-4 flex-col space-y-2">
+                <Button 
+                  variant="secondary" 
+                  className="h-auto p-4 flex-col space-y-2"
+                  onClick={() => navigate('/')}
+                >
                   <Droplets className="h-6 w-6" />
                   <span>Request Blood</span>
                 </Button>

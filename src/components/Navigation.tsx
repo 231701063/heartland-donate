@@ -3,6 +3,9 @@ import { Heart, Menu, X, User, LogOut, Home } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { HowItWorksDialog } from "@/components/HowItWorksDialog";
+import { AboutDialog } from "@/components/AboutDialog";
+import { ContactChatbot } from "@/components/ContactChatbot";
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,15 +35,9 @@ export const Navigation = () => {
             <Link to="/" className="text-foreground hover:text-primary transition-colors">
               Dashboard
             </Link>
-            <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
-              How It Works
-            </a>
-            <a href="#about" className="text-foreground hover:text-primary transition-colors">
-              About
-            </a>
-            <a href="#contact" className="text-foreground hover:text-primary transition-colors">
-              Contact
-            </a>
+            <HowItWorksDialog />
+            <AboutDialog />
+            <ContactChatbot />
           </div>
 
           {/* Desktop Actions */}
@@ -96,15 +93,15 @@ export const Navigation = () => {
               <Link to="/" className="block text-foreground hover:text-primary transition-colors">
                 Dashboard
               </Link>
-              <a href="#how-it-works" className="block text-foreground hover:text-primary transition-colors">
-                How It Works
-              </a>
-              <a href="#about" className="block text-foreground hover:text-primary transition-colors">
-                About
-              </a>
-              <a href="#contact" className="block text-foreground hover:text-primary transition-colors">
-                Contact
-              </a>
+              <div className="block">
+                <HowItWorksDialog />
+              </div>
+              <div className="block">
+                <AboutDialog />
+              </div>
+              <div className="block">
+                <ContactChatbot />
+              </div>
               <div className="pt-4 space-y-2">
                 {showBackToDashboard && (
                   <Link to="/" className="block">

@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { ScheduleDonationDialog } from "@/components/ScheduleDonationDialog";
 import { CreateBloodRequestDialog } from "@/components/CreateBloodRequestDialog";
 import { AcceptRequestDialog } from "@/components/AcceptRequestDialog";
+import { UpdateInventoryDialog } from "@/components/UpdateInventoryDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useBloodRequests, BloodRequest } from "@/hooks/useBloodRequests";
@@ -331,10 +332,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       <div className="bg-gradient-success text-white p-8 rounded-lg shadow-medium">
         <h1 className="text-3xl font-bold mb-2">City General Hospital</h1>
         <p className="text-white/90 mb-4">Managing blood inventory and coordinating donations</p>
-        <Button variant="secondary" className="bg-white text-success hover:bg-white/90">
-          <Hospital className="mr-2 h-4 w-4" />
-          Update Inventory
-        </Button>
+        <UpdateInventoryDialog />
       </div>
 
       {/* Blood Inventory */}
@@ -418,11 +416,26 @@ export const Dashboard = ({ userType }: DashboardProps) => {
               .slice(0, 5)
               .map((request) => (
                 <div key={request.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">Donation Completed</p>
                     <p className="text-sm text-muted-foreground">
                       Blood Type: {request.blood_type}
                     </p>
+                    {request.scheduled_date && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Date: {format(new Date(request.scheduled_date), 'dd-MMM-yyyy, hh:mm a')}
+                      </p>
+                    )}
+                    {request.created_at && (
+                      <p className="text-xs text-muted-foreground">
+                        Created: {format(new Date(request.created_at), 'dd-MMM-yyyy')}
+                      </p>
+                    )}
+                    {request.up_to_date && (
+                      <p className="text-xs text-muted-foreground">
+                        Valid Until: {format(new Date(request.up_to_date), 'dd-MMM-yyyy')}
+                      </p>
+                    )}
                   </div>
                   <Badge className="bg-primary text-primary-foreground">Completed</Badge>
                 </div>
