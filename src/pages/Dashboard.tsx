@@ -1,12 +1,17 @@
+// Dashboard imports
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
+
+// Dialog components
 import { ScheduleDonationDialog } from "@/components/ScheduleDonationDialog";
 import { CreateBloodRequestDialog } from "@/components/CreateBloodRequestDialog";
 import { AcceptRequestDialog } from "@/components/AcceptRequestDialog";
 import { UpdateInventoryDialog } from "@/components/UpdateInventoryDialog";
+
+// Hooks and utilities
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useBloodRequests, BloodRequest } from "@/hooks/useBloodRequests";
