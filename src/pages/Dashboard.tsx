@@ -90,11 +90,11 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate("/")}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Dashboard
+        Back to Home
       </Button>
       
       {/* Welcome Section */}
@@ -230,11 +230,11 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate("/")}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Dashboard
+        Back to Home
       </Button>
       
       {/* Emergency Section */}
@@ -358,11 +358,11 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate("/dashboard")}
+        onClick={() => navigate("/")}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Dashboard
+        Back to Home
       </Button>
       
       {/* Hospital Overview */}
