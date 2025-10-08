@@ -19,7 +19,7 @@ const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
 export const UpdateInventoryDialog = () => {
   const { user } = useAuth();
-  const { updateInventory } = useHospitalInventory();
+  const { addInventory } = useHospitalInventory();
   const [open, setOpen] = useState(false);
   const [units, setUnits] = useState<Record<string, number>>({});
 
@@ -29,9 +29,9 @@ export const UpdateInventoryDialog = () => {
 
     let successCount = 0;
     for (const bloodType of bloodTypes) {
-      const value = units[bloodType];
-      if (value !== undefined && value >= 0) {
-        const success = await updateInventory(bloodType, value, user.id);
+      const change = units[bloodType];
+      if (change !== undefined && change !== 0) {
+        const success = await addInventory(bloodType, change, user.id);
         if (success) successCount++;
       }
     }
@@ -58,7 +58,7 @@ export const UpdateInventoryDialog = () => {
         <DialogHeader>
           <DialogTitle>Update Blood Inventory</DialogTitle>
           <DialogDescription>
-            Update the available units for each blood type
+            Enter positive numbers to add units or negative numbers to decrease units for each blood type
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,8 +69,7 @@ export const UpdateInventoryDialog = () => {
                 <Input
                   id={bloodType}
                   type="number"
-                  min="0"
-                  placeholder="Enter units"
+                  placeholder="e.g., +10 or -5"
                   value={units[bloodType] ?? ''}
                   onChange={(e) => setUnits({ ...units, [bloodType]: parseInt(e.target.value) || 0 })}
                 />

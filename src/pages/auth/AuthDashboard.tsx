@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { FindDonorDialog } from '@/components/FindDonorDialog';
+import { CreateBloodRequestDialog } from '@/components/CreateBloodRequestDialog';
 
 interface UserProfile {
   name: string;
@@ -22,6 +23,7 @@ export const AuthDashboard = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -178,13 +180,25 @@ export const AuthDashboard = () => {
                 
                 <Button 
                   variant="secondary" 
-                  className="h-auto p-4 flex-col space-y-2"
-                  onClick={() => navigate('/')}
+                  className="h-auto p-4 flex-col space-y-2 w-full"
+                  onClick={() => setRequestDialogOpen(true)}
                 >
                   <Droplets className="h-6 w-6" />
                   <span>Request Blood</span>
                 </Button>
               </div>
+              
+              <CreateBloodRequestDialog
+                open={requestDialogOpen}
+                onOpenChange={setRequestDialogOpen}
+                requestType="normal"
+                onRequestCreated={() => {
+                  toast({
+                    title: "Success",
+                    description: "Your blood request has been created",
+                  });
+                }}
+              />
               
               <div className="text-center pt-4">
                 <p className="text-sm text-muted-foreground">

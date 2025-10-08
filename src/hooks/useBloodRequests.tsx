@@ -51,12 +51,36 @@ export const useBloodRequests = () => {
   };
 
   const fetchDonorRequests = async () => {
+    if (!user) return;
+    
     setLoading(true);
     try {
+      // First, get the donor's blood group from their profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('blood_group')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching donor profile:', profileError);
+        toast({
+          title: "Error",
+          description: "Failed to load your profile",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const donorBloodGroup = profileData?.blood_group;
+
+      // Fetch requests matching donor's blood group
       const { data, error } = await supabase
         .from('blood_requests')
         .select('*')
         .in('status', ['pending', 'accepted'])
+        .eq('blood_type', donorBloodGroup)
         .order('created_at', { ascending: false });
 
       if (error) {
