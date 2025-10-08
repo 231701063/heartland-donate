@@ -90,11 +90,11 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/dashboard")}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
+        Back to Dashboard
       </Button>
       
       {/* Welcome Section */}
@@ -227,6 +227,16 @@ export const Dashboard = ({ userType }: DashboardProps) => {
 
   const renderPatientDashboard = () => (
     <div className="space-y-8">
+      {/* Back Button */}
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate("/dashboard")}
+        className="mb-4"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
+      
       {/* Emergency Section */}
       <div className="bg-gradient-emergency text-white p-8 rounded-lg shadow-emergency">
         <h1 className="text-3xl font-bold mb-2">Patient Portal</h1>
@@ -345,6 +355,16 @@ export const Dashboard = ({ userType }: DashboardProps) => {
 
   const renderHospitalDashboard = () => (
     <div className="space-y-8">
+      {/* Back Button */}
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate("/dashboard")}
+        className="mb-4"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
+      
       {/* Hospital Overview */}
       <div className="bg-gradient-success text-white p-8 rounded-lg shadow-medium">
         <h1 className="text-3xl font-bold mb-2">City General Hospital</h1>
