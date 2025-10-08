@@ -2,8 +2,9 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock } from "lucide-react";
+import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Dialog components
 import { ScheduleDonationDialog } from "@/components/ScheduleDonationDialog";
@@ -36,6 +37,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
   const [selectedRequest, setSelectedRequest] = useState<BloodRequest | null>(null);
   const [scheduledDonations, setScheduledDonations] = useState<ScheduledDonation[]>([]);
   const { user } = useAuth();
+  const navigate = useNavigate();
   const bloodRequestsHook = useBloodRequests();
   const hospitalInventoryHook = useHospitalInventory(user?.id);
 
@@ -85,6 +87,16 @@ export const Dashboard = ({ userType }: DashboardProps) => {
   
   const renderDonorDashboard = () => (
     <div className="space-y-8">
+      {/* Back Button */}
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate(-1)}
+        className="mb-4"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+      
       {/* Welcome Section */}
       <div className="bg-gradient-hero text-white p-8 rounded-lg shadow-medium">
         <h1 className="text-3xl font-bold mb-2">Welcome back, Sarah!</h1>
