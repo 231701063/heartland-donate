@@ -33,7 +33,7 @@ export const Login = () => {
         title: "Welcome back!",
         description: "You have been successfully logged in.",
       });
-      navigate('/');
+      navigate('/auth/dashboard');
     }
 
     setLoading(false);

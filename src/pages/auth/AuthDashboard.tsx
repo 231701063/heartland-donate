@@ -168,16 +168,7 @@ export const AuthDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FindDonorDialog
-                  trigger={
-                    <Button variant="hero" className="h-auto p-4 flex-col space-y-2 w-full">
-                      <Heart className="h-6 w-6" />
-                      <span>Find Blood Donors</span>
-                    </Button>
-                  }
-                />
-                
+              <div className="grid grid-cols-1 gap-4">
                 <Button 
                   variant="secondary" 
                   className="h-auto p-4 flex-col space-y-2 w-full"

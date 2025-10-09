@@ -80,6 +80,44 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          blood_request_id: string | null
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          blood_request_id?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          blood_request_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_blood_request_id_fkey"
+            columns: ["blood_request_id"]
+            isOneToOne: false
+            referencedRelation: "blood_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           blood_group: string

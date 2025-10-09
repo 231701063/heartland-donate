@@ -2,9 +2,10 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock, ArrowLeft } from "lucide-react";
+import { Heart, Users, Calendar, AlertCircle, Hospital, MapPin, Clock, ArrowLeft, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { MessagingDialog } from "@/components/MessagingDialog";
 
 // Dialog components
 import { ScheduleDonationDialog } from "@/components/ScheduleDonationDialog";
@@ -29,6 +30,14 @@ interface ScheduledDonation {
   status: string;
 }
 
+interface Donor {
+  user_id: string;
+  name: string;
+  blood_group: string;
+  phone: string;
+  email: string;
+}
+
 export const Dashboard = ({ userType }: DashboardProps) => {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [showEmergencyRequestDialog, setShowEmergencyRequestDialog] = useState(false);
@@ -36,6 +45,8 @@ export const Dashboard = ({ userType }: DashboardProps) => {
   const [showAcceptDialog, setShowAcceptDialog] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<BloodRequest | null>(null);
   const [scheduledDonations, setScheduledDonations] = useState<ScheduledDonation[]>([]);
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [userProfile, setUserProfile] = useState<{ blood_group: string } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const bloodRequestsHook = useBloodRequests();
@@ -62,15 +73,51 @@ export const Dashboard = ({ userType }: DashboardProps) => {
     }
   };
 
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('blood_group')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!error && data) {
+        setUserProfile(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  const fetchDonors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, name, blood_group, phone, email');
+
+      if (!error && data) {
+        setDonors(data);
+      }
+    } catch (error) {
+      console.error('Error fetching donors:', error);
+    }
+  };
+
   useEffect(() => {
-    if (userType === 'donor' && user) {
-      fetchScheduledDonations();
-      bloodRequestsHook.fetchDonorRequests();
-    } else if (userType === 'patient' && user) {
-      bloodRequestsHook.fetchPatientRequests();
-    } else if (userType === 'hospital' && user) {
-      bloodRequestsHook.fetchAllRequests();
-      hospitalInventoryHook.fetchInventory();
+    if (user) {
+      fetchUserProfile();
+      if (userType === 'donor') {
+        fetchScheduledDonations();
+        bloodRequestsHook.fetchDonorRequests();
+      } else if (userType === 'patient') {
+        bloodRequestsHook.fetchPatientRequests();
+        fetchDonors();
+      } else if (userType === 'hospital') {
+        bloodRequestsHook.fetchAllRequests();
+        hospitalInventoryHook.fetchInventory();
+      }
     }
   }, [userType, user]);
 
@@ -319,35 +366,48 @@ export const Dashboard = ({ userType }: DashboardProps) => {
 
       {/* Available Donors */}
       <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4">Available Donors (B+)</h3>
+        <h3 className="text-xl font-semibold mb-4">
+          Available Donors {userProfile?.blood_group && `(${userProfile.blood_group})`}
+        </h3>
         <div className="grid md:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((donor) => (
-            <div key={donor} className="p-4 border border-border rounded-lg">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center">
-                    <Users className="h-5 w-5 text-white" />
+          {donors
+            .filter(donor => !userProfile?.blood_group || donor.blood_group === userProfile.blood_group)
+            .filter(donor => donor.user_id !== user?.id)
+            .length === 0 ? (
+            <p className="col-span-2 text-muted-foreground text-center py-8">
+              No donors available with your blood group at the moment.
+            </p>
+          ) : (
+            donors
+              .filter(donor => !userProfile?.blood_group || donor.blood_group === userProfile.blood_group)
+              .filter(donor => donor.user_id !== user?.id)
+              .map((donor) => (
+                <div key={donor.user_id} className="p-4 border border-border rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center">
+                        <Users className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{donor.name}</p>
+                        <p className="text-sm text-muted-foreground">{donor.blood_group}</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-success text-success-foreground">Available</Badge>
                   </div>
-                  <div>
-                    <p className="font-medium">Donor #{donor}</p>
-                    <p className="text-sm text-muted-foreground">Verified</p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                    <span className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      {donor.phone}
+                    </span>
                   </div>
+                  <MessagingDialog 
+                    donorId={donor.user_id} 
+                    donorName={donor.name}
+                  />
                 </div>
-                <Badge className="bg-success text-success-foreground">Available</Badge>
-              </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  1.2 km away
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  Last donated: 2 months ago
-                </span>
-              </div>
-              <Button variant="outline" size="sm" className="w-full">Contact Donor</Button>
-            </div>
-          ))}
+              ))
+          )}
         </div>
       </Card>
     </div>
