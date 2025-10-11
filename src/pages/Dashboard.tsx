@@ -46,7 +46,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
   const [selectedRequest, setSelectedRequest] = useState<BloodRequest | null>(null);
   const [scheduledDonations, setScheduledDonations] = useState<ScheduledDonation[]>([]);
   const [donors, setDonors] = useState<Donor[]>([]);
-  const [userProfile, setUserProfile] = useState<{ blood_group: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ blood_group: string; name: string } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const bloodRequestsHook = useBloodRequests();
@@ -79,7 +79,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('blood_group')
+        .select('blood_group, name')
         .eq('user_id', user.id)
         .single();
 
@@ -137,7 +137,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
+        onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/auth/dashboard")}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -146,7 +146,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       
       {/* Welcome Section */}
       <div className="bg-gradient-hero text-white p-8 rounded-lg shadow-medium">
-        <h1 className="text-3xl font-bold mb-2">Welcome back, Sarah!</h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome back, {userProfile?.name || 'Donor'}!</h1>
         <p className="text-white/90 mb-4">Your next donation eligibility: March 15, 2024</p>
         <Button 
           variant="secondary" 
@@ -277,7 +277,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
+        onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/auth/dashboard")}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -418,7 +418,7 @@ export const Dashboard = ({ userType }: DashboardProps) => {
       {/* Back Button */}
       <Button 
         variant="ghost" 
-        onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
+        onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/auth/dashboard")}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />

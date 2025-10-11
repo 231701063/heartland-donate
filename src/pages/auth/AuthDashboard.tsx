@@ -195,9 +195,6 @@ export const AuthDashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Ready to explore more features? Visit our main dashboard
                 </p>
-                <Button variant="outline" className="mt-2" onClick={() => window.location.href = '/'}>
-                  Go to Main Dashboard
-                </Button>
               </div>
             </CardContent>
           </Card>
